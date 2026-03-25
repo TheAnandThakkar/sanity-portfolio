@@ -1,0 +1,30 @@
+# Dependencies
+node_modules
+
+# Sanity Studio – build output & local dev cache
+dist/
+.sanity/
+
+# Next.js app (monorepo)
+web/.next/
+web/out/
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+!**/env.local.example
+
+# OS / editor
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Deploy / local tooling
+.vercel
