@@ -1,32 +1,30 @@
 import Link from 'next/link'
 import {SanityImage} from '@/components/SanityImage'
 import {client} from '@/lib/sanity'
-import {postsIndexQuery, profileQuery, projectsQuery} from '@/lib/queries'
-import type {PostSummary, Profile, Project} from '@/types/sanity'
+import {postsIndexQuery, profileQuery} from '@/lib/queries'
+import type {PostSummary, Profile} from '@/types/sanity'
 
 export const revalidate = 60
 
 export default async function HomePage() {
-  const [profile, projects, posts] = await Promise.all([
+  const [profile, posts] = await Promise.all([
     client.fetch<Profile | null>(profileQuery),
-    client.fetch<Project[]>(projectsQuery),
     client.fetch<PostSummary[]>(postsIndexQuery),
   ])
 
-  const featuredProjects = projects.slice(0, 4)
-  const recentPosts = posts.slice(0, 2)
+  const recentPosts = posts.slice(0, 3)
 
   return (
     <main className="mx-auto max-w-3xl px-5 pb-20 pt-10">
-      <section className="mb-16 flex flex-col gap-8 sm:flex-row sm:items-start">
+      <section className="mb-10 flex flex-col gap-8 sm:flex-row sm:items-start">
         {profile?.photo && (
           <div className="shrink-0">
             <SanityImage
               value={profile.photo}
               alt={profile.name || 'Profile photo'}
-              width={120}
-              height={120}
-              className="rounded-2xl border border-foreground/10 object-cover"
+              width={220}
+              height={220}
+              className="h-44 w-44 rounded-3xl border border-foreground/10 object-cover shadow-sm sm:h-56 sm:w-56"
               priority
             />
           </div>
@@ -39,7 +37,9 @@ export default async function HomePage() {
             {profile?.headline || profile?.name || 'Anand Thakkar'}
           </h1>
           {profile?.bio && (
-            <p className="mt-4 max-w-xl text-pretty leading-relaxed text-foreground/80">{profile.bio}</p>
+            <div className="mt-5 text-sm leading-relaxed text-foreground/80">
+              {profile.bio}
+            </div>
           )}
           <div className="mt-6 flex flex-wrap gap-4 text-sm">
             {profile?.email && (
@@ -84,49 +84,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {featuredProjects.length > 0 && (
-        <section className="mb-16">
-          <div className="mb-6 flex items-baseline justify-between gap-4">
-            <h2 className="text-lg font-semibold tracking-tight">Projects</h2>
-            <Link href="/projects" className="text-sm text-foreground/60 hover:text-foreground">
-              View all
-            </Link>
-          </div>
-          <ul className="grid gap-4 sm:grid-cols-2">
-            {featuredProjects.map((p) => (
-              <li
-                key={p._id}
-                className="rounded-xl border border-foreground/10 bg-foreground/[0.02] p-4 transition hover:border-foreground/20"
-              >
-                {p.image && (
-                  <SanityImage
-                    value={p.image}
-                    alt={p.title || 'Project'}
-                    width={400}
-                    height={200}
-                    className="mb-3 h-32 w-full rounded-lg object-cover"
-                  />
-                )}
-                <h3 className="font-medium">{p.title}</h3>
-                {p.summary && (
-                  <p className="mt-1 line-clamp-2 text-sm text-foreground/65">{p.summary}</p>
-                )}
-                {p.url && (
-                  <a
-                    href={p.url}
-                    className="mt-2 inline-block text-sm text-foreground/70 underline decoration-foreground/20 underline-offset-4 hover:text-foreground"
-                    rel="noopener noreferrer"
-                    target="_blank"
-                  >
-                    Visit
-                  </a>
-                )}
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-
       {recentPosts.length > 0 && (
         <section>
           <div className="mb-6 flex items-baseline justify-between gap-4">
@@ -136,28 +93,67 @@ export default async function HomePage() {
             </Link>
           </div>
           <ul className="space-y-4">
-            {recentPosts.map((post) => (
-              <li key={post._id}>
-                <Link
-                  href={post.slug ? `/blog/${post.slug}` : '#'}
-                  className="group block rounded-lg border border-transparent px-2 py-3 transition hover:border-foreground/10 hover:bg-foreground/[0.03]"
-                >
-                  <p className="text-xs text-foreground/45">
-                    {post.publishedAt
-                      ? new Date(post.publishedAt).toLocaleDateString(undefined, {
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric',
-                        })
-                      : ''}
-                  </p>
-                  <h3 className="mt-1 font-medium group-hover:underline">{post.title}</h3>
-                  {post.excerpt && (
-                    <p className="mt-1 line-clamp-2 text-sm text-foreground/65">{post.excerpt}</p>
-                  )}
-                </Link>
-              </li>
-            ))}
+            {recentPosts.map((post) => {
+              const authorAvatar =
+                post.author?.image?.asset != null ? post.author.image : profile?.photo
+              const bylineName = post.author?.name ?? profile?.name ?? 'Anand Thakkar'
+              const showAuthorRow = Boolean(post.author?.name || authorAvatar?.asset)
+              return (
+                <li key={post._id}>
+                  <Link
+                    href={post.slug ? `/blog/${post.slug}` : '#'}
+                    className="group flex gap-4 rounded-xl border border-foreground/10 bg-foreground/[0.02] p-4 transition hover:border-foreground/20 hover:bg-foreground/[0.04]"
+                  >
+                    {post.heroImage?.asset && (
+                      <div className="shrink-0">
+                        <SanityImage
+                          variant="thumbnail"
+                          value={post.heroImage}
+                          alt={post.heroImage.alt || post.title || 'Post thumbnail'}
+                          width={140}
+                          height={84}
+                          className="h-[4.5rem] w-[7.5rem] rounded-xl border border-foreground/10 object-cover sm:h-[5.25rem] sm:w-[8.75rem]"
+                        />
+                      </div>
+                    )}
+                    <div className="flex min-w-0 flex-1 flex-col">
+                      <h3 className="text-lg font-semibold group-hover:underline">{post.title}</h3>
+                      {post.excerpt && (
+                        <p className="mt-1 line-clamp-2 text-sm text-foreground/65">{post.excerpt}</p>
+                      )}
+                      <div className="mt-auto flex items-center justify-between gap-4 pt-3">
+                        <p className="text-left text-xs text-foreground/45">
+                          {post.publishedAt
+                            ? new Date(post.publishedAt).toLocaleDateString(undefined, {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric',
+                              })
+                            : ''}
+                        </p>
+                        {showAuthorRow && (
+                          <div className="flex shrink-0 items-center justify-end gap-2 text-right">
+                            {authorAvatar?.asset && (
+                              <SanityImage
+                                variant="thumbnail"
+                                value={authorAvatar}
+                                alt={bylineName}
+                                width={28}
+                                height={28}
+                                className="h-6 w-6 shrink-0 rounded-full border border-foreground/10 object-cover"
+                              />
+                            )}
+                            <p className="text-xs uppercase tracking-wide text-foreground/50">
+                              By {bylineName}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </Link>
+                </li>
+              )
+            })}
           </ul>
         </section>
       )}

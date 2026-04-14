@@ -22,3 +22,19 @@ const builder = createImageUrlBuilder({projectId, dataset})
 export function urlFor(source: SanityImageSource) {
   return builder.image(source)
 }
+
+/**
+ * Fixed-size thumbnail URL for list cards and previews. Uses `fit('crop')` so
+ * Studio hotspot/crop on the image document is respected (set via hero image field).
+ * GROQ should return the full image object (e.g. `heroImage`), not only `asset._ref`.
+ */
+export function thumbnailUrl(source: SanityImageSource, width: number, height: number): string {
+  return builder
+    .image(source)
+    .width(Math.round(width * 2))
+    .height(Math.round(height * 2))
+    .fit('crop')
+    .auto('format')
+    .quality(85)
+    .url()
+}

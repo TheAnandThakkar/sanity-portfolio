@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     template: '%s · Anand Thakkar',
   },
   description:
-    'Software developer. Portfolio and blog — built as a first Sanity project with Next.js.',
+    'Software developer. My first Sanity + Next.js project, focused on blog-driven content modeling and delivery.',
 }
 
 export default function RootLayout({

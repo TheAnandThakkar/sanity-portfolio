@@ -12,22 +12,19 @@ export type Profile = {
   twitter: string | null
 }
 
-export type Project = {
-  _id: string
-  title: string | null
-  slug: string | null
-  summary: string | null
-  image: {asset?: {_ref: string}} | null
-  url: string | null
-  tags: string[] | null
-}
-
 export type PostSummary = {
   _id: string
   title: string | null
   slug: string | null
   publishedAt: string | null
   excerpt: string | null
+  heroImage: ({asset?: {_ref: string}} & {alt?: string}) | null
+  author: {
+    name: string | null
+    title: string | null
+    bio?: string | null
+    image: {asset?: {_ref: string}} | null
+  } | null
 }
 
 export type PostDetail = PostSummary & {
