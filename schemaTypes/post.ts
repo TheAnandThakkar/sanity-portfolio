@@ -34,6 +34,27 @@ export const post = defineType({
       validation: (rule) => rule.max(280).warning('Keep under ~280 characters'),
     }),
     defineField({
+      name: 'heroImage',
+      title: 'Hero image',
+      type: 'image',
+      options: {hotspot: true},
+      fields: [
+        defineField({
+          name: 'alt',
+          title: 'Alternative text',
+          type: 'string',
+          validation: (rule) => rule.required(),
+        }),
+      ],
+    }),
+    defineField({
+      name: 'author',
+      title: 'Author',
+      type: 'reference',
+      to: [{type: 'author'}],
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
       name: 'body',
       title: 'Body',
       type: 'blockContent',
@@ -41,11 +62,13 @@ export const post = defineType({
     }),
   ],
   preview: {
-    select: {title: 'title', subtitle: 'publishedAt'},
-    prepare({title, subtitle}) {
+    select: {title: 'title', subtitle: 'author.name', publishedAt: 'publishedAt'},
+    prepare({title, subtitle, publishedAt}) {
       return {
         title,
-        subtitle: subtitle ? new Date(subtitle).toLocaleDateString() : '',
+        subtitle: [subtitle, publishedAt ? new Date(publishedAt).toLocaleDateString() : '']
+          .filter(Boolean)
+          .join(' · '),
       }
     },
   },

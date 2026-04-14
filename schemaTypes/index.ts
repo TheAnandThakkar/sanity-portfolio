@@ -1,6 +1,6 @@
+import {author} from './author'
 import {blockContent} from './blockContent'
 import {post} from './post'
 import {profile} from './profile'
-import {project} from './project'
 
-export const schemaTypes = [blockContent, profile, project, post]
+export const schemaTypes = [blockContent, profile, author, post]
